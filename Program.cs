@@ -74,7 +74,10 @@ while (running)
     }
     else
     {
+        tryClear();
+        Console.WriteLine("=== welcome to Lina's Health care ===");
 
+        Console.ReadLine();
     }
 }
 
