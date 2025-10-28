@@ -4,6 +4,11 @@ using App;
 User? active_user = null;
 
 List<User> users = new();
+users.Add(new("000", "000", "Lina"));
+users.Add(new("111", "111", "David"));
+
+users[0].Permissions.Add(Permission.AddUser);
+
 
 bool running = true;
 
@@ -11,6 +16,7 @@ while (running)
 {
     if (active_user == null)
     {
+        tryClear();
         Console.WriteLine("=== Login page ===");
         Console.WriteLine("1. Login");
         Console.WriteLine("2. Register as a patient");
@@ -75,9 +81,48 @@ while (running)
     else
     {
         tryClear();
-        Console.WriteLine("=== welcome to Lina's Health care ===");
+        Console.WriteLine($"=== welcome {active_user.Name} to Lina's Health care ===");
 
-        Console.ReadLine();
+        Dictionary<string, Permission> menuOptions = new();
+        int index = 1;
+
+        foreach (Permission permission in active_user.Permissions)
+        {
+            menuOptions[index.ToString()] = permission;
+            string menuText = $"[{index}] - ";
+            switch (permission)
+            {
+                case Permission.AddUser:
+                    menuText += "Add new user";
+                    break;
+            }
+            Console.WriteLine(menuText);
+            index += 1;
+        }
+        menuOptions[index.ToString()] = Permission.Logout;
+        Console.WriteLine($"[{index}] - Logout");
+        index += 1;
+        menuOptions[index.ToString()] = Permission.Quit;
+        Console.WriteLine($"[{index}] - Quit");
+
+        string? input = Console.ReadLine();
+        Debug.Assert(input != null);
+        switch (menuOptions[input])
+        {
+            case Permission.AddUser:
+                Console.WriteLine("The add user menu");
+                Console.ReadLine();
+                break;
+
+            case Permission.Logout:
+                active_user = null;
+                break;
+
+            case Permission.Quit:
+                running = false;
+                break;
+
+        }
     }
 }
 

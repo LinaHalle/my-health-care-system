@@ -1,14 +1,15 @@
-using System.Security;
 
 namespace App;
 
 class User
 {
     public string SSN;
-    public string Name;
     string _password;
+    public string Name;
 
-    public User(string ssn, string name, string password)
+    public List<Permission> Permissions = new();
+
+    public User(string ssn, string password, string name)
     {
         SSN = ssn;
         Name = name;
@@ -18,6 +19,23 @@ class User
     public bool Trylogin(string ssn, string password)
     {
         return ssn == SSN && password == _password;
+    }
+
+    public bool IsAllowed(Permission permission)
+    {
+        return Permissions.Contains(permission);
+    }
+
+    public void HandlePermission(Permission permission)
+    {
+        if (Permissions.Contains(permission))
+        {
+            Permissions.Remove(permission);
+        }
+        else
+        {
+            Permissions.Add(permission);
+        }
     }
 
 }
