@@ -8,6 +8,10 @@ users.Add(new("000", "000", "Lina"));
 users.Add(new("111", "111", "David"));
 
 users[0].Permissions.Add(Permission.AddUser);
+users[0].Permissions.Add(Permission.AddPermission);
+users[0].Permissions.Add(Permission.AssignAdminRegion);
+users[0].Permissions.Add(Permission.ViewAppointments);
+
 
 
 bool running = true;
@@ -95,6 +99,31 @@ while (running)
                 case Permission.AddUser:
                     menuText += "Add new user";
                     break;
+                case Permission.AddPermission:
+                    menuText += "Add permissions to user";
+                    break;
+                case Permission.ViewPermissions:
+                    menuText += "View permissions";
+                    break;
+                case Permission.ViewJournal:
+                    menuText += "View journal";
+                    break;
+                case Permission.WriteJournal:
+                    menuText += "Write in Journal";
+                    break;
+                case Permission.ViewAppointments:
+                    menuText += "View appointments";
+                    break;
+                case Permission.ViewSchedule:
+                    menuText += "View schedule";
+                    break;
+                case Permission.AssignAdminRegion:
+                    menuText += "Assign an Admin to a region";
+                    break;
+                case Permission.AddLocation:
+                    menuText += "Add a new hospital";
+                    break;
+
             }
             Console.WriteLine(menuText);
             index += 1;
@@ -112,6 +141,30 @@ while (running)
             case Permission.AddUser:
                 Console.WriteLine("The add user menu");
                 Console.ReadLine();
+                break;
+
+            case Permission.AddPermission:
+                break;
+
+            case Permission.ViewPermissions:
+                break;
+
+            case Permission.ViewJournal:
+                break;
+
+            case Permission.WriteJournal:
+                break;
+
+            case Permission.ViewAppointments:
+                break;
+
+            case Permission.ViewSchedule:
+                break;
+
+            case Permission.AssignAdminRegion:
+                break;
+
+            case Permission.AddLocation:
                 break;
 
             case Permission.Logout:
