@@ -4,8 +4,8 @@ using App;
 User? active_user = null;
 
 List<User> users = new();
-users.Add(new("000", "000", "Lina"));
-users.Add(new("111", "111", "David"));
+users.Add(new("000", "000", "Lina", User.UserStatus.accepted));
+users.Add(new("111", "111", "David", User.UserStatus.accepted));
 
 users[0].Permissions.Add(Permission.AddUser);
 users[0].Permissions.Add(Permission.AddPermission);
@@ -39,10 +39,9 @@ while (running)
                 Debug.Assert(ssn != null);
                 Debug.Assert(password != null);
 
-
                 foreach (User user in users)
                 {
-                    if (user.Trylogin(ssn, password))
+                    if (user.Trylogin(ssn, password) && user.Status == User.UserStatus.accepted)
                     {
                         active_user = user;
                         break;
@@ -54,7 +53,9 @@ while (running)
                     Console.ReadLine();
                 }
                 break;
+
             case "2":
+                //requesting to be a patient, pending by deafult
                 tryClear();
                 Console.Write("Enter your SSN: ");
                 string? newSsn = Console.ReadLine();
@@ -69,7 +70,7 @@ while (running)
                 Debug.Assert(newName != null);
                 Debug.Assert(newPassword != null);
 
-                users.Add(new User(newSsn, newName, newPassword));
+                users.Add(new User(newSsn, newPassword, newName, User.UserStatus.pending));
 
                 tryClear();
                 Console.WriteLine("Account registerd succesfully, waiting for approval, press ENTER to go back");
@@ -139,8 +140,20 @@ while (running)
         switch (menuOptions[input])
         {
             case Permission.AddUser:
-                Console.WriteLine("The add user menu");
-                Console.ReadLine();
+                //creating an user that is accepted (staff, admin)
+                Console.Write("New User's SSN: ");
+                string? newSsn = Console.ReadLine();
+                Debug.Assert(newSsn != null);
+
+                Console.Write("New user's name: ");
+                string? newName = Console.ReadLine();
+                Debug.Assert(newName != null);
+
+                Console.Write("Create password: ");
+                string? newPassword = Console.ReadLine();
+                Debug.Assert(newPassword != null);
+
+                users.Add(new User(newSsn, newPassword, newName, User.UserStatus.accepted));
                 break;
 
             case Permission.AddPermission:

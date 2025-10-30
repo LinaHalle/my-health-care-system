@@ -6,14 +6,17 @@ class User
     public string SSN;
     string _password;
     public string Name;
+    public UserStatus Status;
 
     public List<Permission> Permissions = new();
 
-    public User(string ssn, string password, string name)
+    public User(string ssn, string password, string name, UserStatus status)
     {
         SSN = ssn;
         Name = name;
         _password = password;
+        Status = status;
+
     }
 
     public bool Trylogin(string ssn, string password)
@@ -36,6 +39,13 @@ class User
         {
             Permissions.Add(permission);
         }
+    }
+
+    public enum UserStatus
+    {
+        pending,
+        accepted,
+        declined,
     }
 
 }
