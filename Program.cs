@@ -124,6 +124,9 @@ while (running)
                 case Permission.AddLocation:
                     menuText += "Add a new hospital";
                     break;
+                case Permission.AcceptOrDenyUser:
+                    menuText += "Accept or deny a user";
+                    break;
 
             }
             Console.WriteLine(menuText);

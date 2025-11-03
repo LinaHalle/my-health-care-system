@@ -11,6 +11,7 @@ enum Permission
     WriteJournal,
     ViewAppointments,
     ViewSchedule,
+    AcceptOrDenyUser,
     Logout,
     Quit,
 }
