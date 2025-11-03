@@ -11,6 +11,8 @@ users[0].Permissions.Add(Permission.AddUser);
 users[0].Permissions.Add(Permission.AddPermission);
 users[0].Permissions.Add(Permission.AssignAdminRegion);
 users[0].Permissions.Add(Permission.ViewAppointments);
+users[0].Permissions.Add(Permission.AcceptOrDenyUser);
+
 
 
 
@@ -181,6 +183,59 @@ while (running)
                 break;
 
             case Permission.AddLocation:
+                break;
+
+            case Permission.AcceptOrDenyUser:
+                foreach (User user in users)
+                {
+                    if (user.Status == User.UserStatus.pending)
+                    {
+                        Console.WriteLine(user.Name + ": " + user.SSN);
+                    }
+                }
+
+                Console.WriteLine("Choose the SSN of the user you want to change status on");
+                string? chosenssn = Console.ReadLine();
+                Debug.Assert(chosenssn != null);
+
+                User? selectedUser = null;
+
+                foreach (User user1 in users)
+                {
+                    if (user1.SSN == chosenssn)
+                    {
+                        selectedUser = user1;
+                        break;
+                    }
+                }
+
+                if (selectedUser == null)
+                {
+                    tryClear();
+                    Console.WriteLine("User not found, press ENTER to continue");
+                    Console.ReadLine();
+                }
+
+                Console.WriteLine("Do you want to accept or deny user request?");
+                Console.WriteLine("Press 1: To accept");
+                Console.WriteLine("Press 2: To deny");
+                string? aOrD = Console.ReadLine();
+                Debug.Assert(aOrD != null);
+                Debug.Assert(selectedUser != null);
+                switch (aOrD)
+                {
+                    case "1":
+                        selectedUser.Status = User.UserStatus.accepted;
+                        Console.WriteLine("The user is now accepted, press ENTER to go back");
+                        Console.ReadLine();
+                        break;
+
+                    case "2":
+                        selectedUser.Status = User.UserStatus.declined;
+                        Console.WriteLine("The user is now declined, press ENTER to go back");
+                        Console.ReadLine();
+                        break;
+                }
                 break;
 
             case Permission.Logout:

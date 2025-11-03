@@ -1,6 +1,6 @@
 namespace App;
 
-enum Permission
+public enum Permission
 {
     AddUser,
     AddPermission,
