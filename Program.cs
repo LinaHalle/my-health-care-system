@@ -208,6 +208,17 @@ while (running)
                 break;
 
             case Permission.ViewPermissions:
+                foreach (User user in users)
+                {
+                    Console.WriteLine(user.Name);
+                    foreach (Permission permission in user.Permissions)
+                    {
+                        Console.WriteLine(permission);
+                    }
+                    Console.WriteLine("----------------------");
+                }
+                Console.WriteLine("Press ENTER to go back");
+                Console.ReadLine();
                 break;
 
             case Permission.ViewJournal:
