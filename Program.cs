@@ -9,8 +9,6 @@ users.Add(new("111", "111", "David", User.UserStatus.accepted));
 
 users[0].Permissions.Add(Permission.AddUser);
 users[0].Permissions.Add(Permission.AddPermission);
-users[0].Permissions.Add(Permission.AssignAdminRegion);
-users[0].Permissions.Add(Permission.ViewAppointments);
 users[0].Permissions.Add(Permission.AcceptOrDenyUser);
 
 
@@ -162,6 +160,51 @@ while (running)
                 break;
 
             case Permission.AddPermission:
+                foreach (User user in users)
+                {
+                    Console.WriteLine($"[{user.SSN}] - {user.Name}");
+                }
+                Console.WriteLine("-----------------");
+                Console.Write("Enter the users SSN: ");
+                string? ssn = Console.ReadLine();
+                Debug.Assert(ssn != null);
+                User? userEdit = users.Find(u => u.SSN == ssn);
+                if (userEdit != null)
+                {
+                    bool editing = true;
+                    while (editing)
+                    {
+                        tryClear();
+                        Console.WriteLine($"{userEdit.Name}'s permissions");
+                        Permission[] permissionAll = Enum.GetValues<Permission>();
+                        int optionMaxNum = 0;
+                        for (int i = 0; i < permissionAll.Length; i++)
+                        {
+                            Permission permission = permissionAll[i];
+                            if (permission != Permission.Logout && permission != Permission.Quit)
+                            {
+                                Console.WriteLine($"[{i + 1}] - {permission}\t is allowed: {userEdit.IsAllowed(permission)}");
+                                optionMaxNum += 1;
+                            }
+                        }
+                        Console.WriteLine($"[1 - {optionMaxNum}] - handle the permission");
+                        Console.WriteLine("[f] - finish editing");
+                        string? selectedOption = Console.ReadLine();
+                        Debug.Assert(selectedOption != null);
+                        if (selectedOption == "f")
+                        {
+                            editing = false;
+                        }
+                        else if (int.TryParse(selectedOption, out int selectedIndex))
+                        {
+                            Permission permission = permissionAll[selectedIndex - 1];
+                            if (permission != Permission.Logout && permission != Permission.Quit)
+                            {
+                                userEdit.HandlePermission(permission);
+                            }
+                        }
+                    }
+                }
                 break;
 
             case Permission.ViewPermissions:
