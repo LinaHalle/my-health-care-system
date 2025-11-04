@@ -4,8 +4,12 @@ using App;
 User? active_user = null;
 
 List<User> users = new();
-users.Add(new("000", "000", "Lina", User.UserStatus.accepted));
-users.Add(new("111", "111", "David", User.UserStatus.accepted));
+users.Add(new("000", "000", "Lina", User.UserStatus.accepted)); //admin 
+users.Add(new("111", "111", "David", User.UserStatus.accepted)); //staff
+users.Add(new("222", "222", "Gustav", User.UserStatus.accepted)); //patient
+users.Add(new("333", "333", "Harris", User.UserStatus.accepted)); //patient 
+users.Add(new("444", "555", "Zomi", User.UserStatus.accepted)); //patient 
+
 
 users[0].Permissions.Add(Permission.AddUser);
 users[0].Permissions.Add(Permission.AddPermission);
