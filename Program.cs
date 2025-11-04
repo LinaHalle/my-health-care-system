@@ -288,6 +288,7 @@ while (running)
                 break;
 
             case Permission.RequestAppointment:
+                tryClear();
                 foreach (User user in users)
                 {
                     if (user.Role == User.UserRole.personell)
@@ -298,7 +299,9 @@ while (running)
                 Console.WriteLine("Select which medical personell you want to meet");
                 string? selectedStaff = Console.ReadLine();
                 Debug.Assert(selectedStaff != null);
-
+                User? selectedP = users.Find(u => u.Name == selectedStaff);
+                //selectedP varibel för rätt personell
+                Console.WriteLine("What day ");
 
 
                 break;
