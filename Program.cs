@@ -115,9 +115,6 @@ while (running)
                 case Permission.ViewAppointments:
                     menuText += "View appointments";
                     break;
-                case Permission.ViewSchedule:
-                    menuText += "View schedule";
-                    break;
                 case Permission.AssignAdminRegion:
                     menuText += "Assign an Admin to a region";
                     break;
@@ -127,7 +124,24 @@ while (running)
                 case Permission.AcceptOrDenyUser:
                     menuText += "Accept or deny a user";
                     break;
-
+                case Permission.ViewHospitalSchedule:
+                    menuText += "View hospital schedule";
+                    break;
+                case Permission.ViewMySchedule:
+                    menuText += "View my schedule";
+                    break;
+                case Permission.RequestAppointment:
+                    menuText += "Request an appointment";
+                    break;
+                case Permission.RegisterAppointment:
+                    menuText += "Register an appointment";
+                    break;
+                case Permission.AcceptOrDenyAppointments:
+                    menuText += "Accept or deny appointment";
+                    break;
+                case Permission.ModifyAppointments:
+                    menuText += "Modify an appointment";
+                    break;
             }
             Console.WriteLine(menuText);
             index += 1;
@@ -227,10 +241,25 @@ while (running)
             case Permission.WriteJournal:
                 break;
 
+            case Permission.ViewMyJournal:
+                break;
+
             case Permission.ViewAppointments:
                 break;
 
-            case Permission.ViewSchedule:
+            case Permission.RequestAppointment:
+                break;
+
+            case Permission.RegisterAppointment:
+                break;
+
+            case Permission.ModifyAppointments:
+                break;
+
+            case Permission.ViewMySchedule:
+                break;
+
+            case Permission.ViewHospitalSchedule:
                 break;
 
             case Permission.AssignAdminRegion:
