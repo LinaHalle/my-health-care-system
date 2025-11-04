@@ -16,6 +16,12 @@ users[0].Permissions.Add(Permission.AddUser);
 users[0].Permissions.Add(Permission.AddPermission);
 users[0].Permissions.Add(Permission.AcceptOrDenyUser);
 
+users[3].Permissions.Add(Permission.RequestAppointment);
+users[3].Permissions.Add(Permission.ViewMyJournal);
+users[3].Permissions.Add(Permission.ViewAppointments);
+
+
+
 
 
 
@@ -147,6 +153,9 @@ while (running)
                 case Permission.ModifyAppointments:
                     menuText += "Modify an appointment";
                     break;
+                case Permission.ViewMyJournal:
+                    menuText += "View my journal";
+                    break;
             }
             Console.WriteLine(menuText);
             index += 1;
@@ -162,7 +171,7 @@ while (running)
         switch (menuOptions[input])
         {
             case Permission.AddUser:
-                //creating an user that is accepted (staff, admin)
+                //creating an user that is accepted (staff, admin, patient)
                 tryClear();
                 Console.Write("New User's SSN: ");
                 string? newSsn = Console.ReadLine();
@@ -281,12 +290,17 @@ while (running)
             case Permission.RequestAppointment:
                 foreach (User user in users)
                 {
-                    if (user != active_user)
+                    if (user.Role == User.UserRole.personell)
                     {
                         Console.WriteLine($"{user.Name}");
                     }
                 }
-                Console.WriteLine("Select which doctor you want to meet");
+                Console.WriteLine("Select which medical personell you want to meet");
+                string? selectedStaff = Console.ReadLine();
+                Debug.Assert(selectedStaff != null);
+
+
+
                 break;
 
             case Permission.RegisterAppointment:
