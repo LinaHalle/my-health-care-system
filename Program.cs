@@ -16,11 +16,14 @@ users[0].Permissions.Add(Permission.AddUser);
 users[0].Permissions.Add(Permission.AddPermission);
 users[0].Permissions.Add(Permission.AcceptOrDenyUser);
 
+users[1].Permissions.Add(Permission.AcceptOrDenyAppointments);
+
+
 users[3].Permissions.Add(Permission.RequestAppointment);
 users[3].Permissions.Add(Permission.ViewMyJournal);
 users[3].Permissions.Add(Permission.ViewAppointments);
 
-
+List<Appointment> appointments = new();
 
 
 
@@ -285,28 +288,111 @@ while (running)
                 break;
 
             case Permission.ViewAppointments:
+                tryClear();
+                Console.WriteLine("=== Your Appointments ===");
+                List<Appointment> myAppointments = appointments.Where(a => a.Patient == active_user).ToList();
+
+                if (myAppointments.Count == 0)
+                {
+                    Console.WriteLine("You have no appointments yet.");
+                }
+                else
+                {
+                    foreach (Appointment a in myAppointments)
+                    {
+                        Console.WriteLine(a);
+                    }
+                }
+                Console.WriteLine("Press ENTER to go back");
+                Console.ReadLine();
                 break;
 
             case Permission.RequestAppointment:
                 tryClear();
-                foreach (User user in users)
+                Console.WriteLine("=== Request an appointment ===");
+                Console.WriteLine("Available medical staff:");
+
+                List<User> availableStaff = users.Where(u => u.Role == User.UserRole.personell).ToList();
+
+                for (int i = 0; i < availableStaff.Count; i++)
                 {
-                    if (user.Role == User.UserRole.personell)
+                    Console.WriteLine($"[{i + 1}] - {availableStaff[i].Name}");
+                }
+                Console.Write("Select which medical staff you want to meet (number): ");
+                string? staffChoice = Console.ReadLine();
+                Debug.Assert(staffChoice != null);
+                if (int.TryParse(staffChoice, out int staffIndex) && staffIndex > 0 && staffIndex <= availableStaff.Count)
+                {
+                    User selectedStaff = availableStaff[staffIndex - 1];
+                    Console.Write("Enter date for appointment (YYYY-MM-DD): ");
+                    String? dateInput = Console.ReadLine();
+
+                    if (DateTime.TryParse(dateInput, out DateTime date))
                     {
-                        Console.WriteLine($"{user.Name}");
+                        Appointment newAppointment = new Appointment(active_user, selectedStaff, date);
+                        appointments.Add(newAppointment);
+
+                        Console.WriteLine($"Appointment requested with {selectedStaff.Name} on {date.ToShortDateString()}.");
+                        Console.WriteLine("Status: Waiting for approval");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid date format");
                     }
                 }
-                Console.WriteLine("Select which medical personell you want to meet");
-                string? selectedStaff = Console.ReadLine();
-                Debug.Assert(selectedStaff != null);
-                User? selectedP = users.Find(u => u.Name == selectedStaff);
-                //selectedP varibel för rätt personell
-                Console.WriteLine("What day ");
+                else
+                {
+                    Console.WriteLine("Invalid selection");
+                }
 
+                Console.WriteLine("Press ENTER to go back");
+                Console.ReadLine();
+                break;
 
+            case Permission.AcceptOrDenyAppointments:
+                tryClear();
+                Console.WriteLine("=== Pending appointment requests ===");
+                List<Appointment> pending = appointments.Where(a => a.Personell == active_user && a.Status == Appointment.AppointmentStatus.Pending).ToList();
+                if (pending.Count == 0)
+                {
+                    Console.WriteLine("No pending requests");
+                }
+                else
+                {
+                    for (int i = 0; i < pending.Count; i++)
+                    {
+                        Appointment appointment = pending[i];
+                        Console.WriteLine($"[{i + 1}] - {appointment.Patient.Name} on {appointment.Date.ToShortDateString()}");
+                    }
+                    Console.Write("Select appointment to handle: ");
+                    string? choice = Console.ReadLine();
+                    Debug.Assert(choice != null);
+
+                    if (int.TryParse(choice, out int appoIndex) && appoIndex > 0 && appoIndex <= pending.Count)
+                    {
+                        Appointment selected = pending[appoIndex - 1];
+                        Console.WriteLine("1. Accept");
+                        Console.WriteLine("2. Deny");
+                        string? action = Console.ReadLine();
+                        Debug.Assert(action != null);
+                        if (action == "1")
+                        {
+                            selected.Status = Appointment.AppointmentStatus.Accepted;
+                        }
+                        else if (action == "2")
+                        {
+                            selected.Status = Appointment.AppointmentStatus.Denied;
+                        }
+                        Console.WriteLine("Updated successfully!");
+                    }
+                }
+
+                Console.WriteLine("Press ENTER to go back");
+                Console.ReadLine();
                 break;
 
             case Permission.RegisterAppointment:
+
                 break;
 
             case Permission.ModifyAppointments:
