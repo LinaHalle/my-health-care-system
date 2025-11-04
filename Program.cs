@@ -4,11 +4,12 @@ using App;
 User? active_user = null;
 
 List<User> users = new();
-users.Add(new("000", "000", "Lina", User.UserStatus.accepted)); //admin 
-users.Add(new("111", "111", "David", User.UserStatus.accepted)); //staff
-users.Add(new("222", "222", "Gustav", User.UserStatus.accepted)); //patient
-users.Add(new("333", "333", "Harris", User.UserStatus.accepted)); //patient 
-users.Add(new("444", "555", "Zomi", User.UserStatus.accepted)); //patient 
+users.Add(new("000", "000", "Lina", User.UserRole.admin, User.UserStatus.accepted)); //admin 
+users.Add(new("111", "111", "David", User.UserRole.personell, User.UserStatus.accepted)); //staff
+users.Add(new("555", "555", "Joel", User.UserRole.personell, User.UserStatus.accepted)); //staff
+users.Add(new("222", "222", "Gustav", User.UserRole.patient, User.UserStatus.accepted)); //patient
+users.Add(new("333", "333", "Harris", User.UserRole.patient, User.UserStatus.accepted)); //patient 
+users.Add(new("444", "444", "Zomi", User.UserRole.patient, User.UserStatus.accepted)); //patient 
 
 
 users[0].Permissions.Add(Permission.AddUser);
@@ -74,7 +75,7 @@ while (running)
                 Debug.Assert(newName != null);
                 Debug.Assert(newPassword != null);
 
-                users.Add(new User(newSsn, newPassword, newName, User.UserStatus.pending));
+                users.Add(new User(newSsn, newPassword, newName, User.UserRole.patient, User.UserStatus.pending));
 
                 tryClear();
                 Console.WriteLine("Account registerd succesfully, waiting for approval, press ENTER to go back");
@@ -162,6 +163,7 @@ while (running)
         {
             case Permission.AddUser:
                 //creating an user that is accepted (staff, admin)
+                tryClear();
                 Console.Write("New User's SSN: ");
                 string? newSsn = Console.ReadLine();
                 Debug.Assert(newSsn != null);
@@ -174,7 +176,32 @@ while (running)
                 string? newPassword = Console.ReadLine();
                 Debug.Assert(newPassword != null);
 
-                users.Add(new User(newSsn, newPassword, newName, User.UserStatus.accepted));
+                Console.Write("New User's role? patient, personell or admin: ");
+                string? newRole = Console.ReadLine();
+                Debug.Assert(newRole != null);
+
+                if (newRole == "patient")
+                {
+                    users.Add(new User(newSsn, newPassword, newName, User.UserRole.patient, User.UserStatus.accepted));
+                }
+                else if (newRole == "personell")
+                {
+                    users.Add(new User(newSsn, newPassword, newName, User.UserRole.personell, User.UserStatus.accepted));
+                }
+                else if (newRole == "admin")
+                {
+                    users.Add(new User(newSsn, newPassword, newName, User.UserRole.admin, User.UserStatus.accepted));
+                }
+                else
+                {
+                    Console.WriteLine("Wrong input, press ENTER to go back");
+                    Console.ReadLine();
+                    break;
+
+                }
+                tryClear();
+                Console.WriteLine($"New {newRole} added! Press ENTER to continue");
+                Console.ReadLine();
                 break;
 
             case Permission.AddPermission:
@@ -252,6 +279,14 @@ while (running)
                 break;
 
             case Permission.RequestAppointment:
+                foreach (User user in users)
+                {
+                    if (user != active_user)
+                    {
+                        Console.WriteLine($"{user.Name}");
+                    }
+                }
+                Console.WriteLine("Select which doctor you want to meet");
                 break;
 
             case Permission.RegisterAppointment:

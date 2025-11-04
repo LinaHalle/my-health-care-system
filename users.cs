@@ -7,15 +7,17 @@ class User
     string _password;
     public string Name;
     public UserStatus Status;
+    public UserRole Role;
 
     public List<Permission> Permissions = new();
 
-    public User(string ssn, string password, string name, UserStatus status)
+    public User(string ssn, string password, string name, UserRole role, UserStatus status)
     {
         SSN = ssn;
         Name = name;
         _password = password;
         Status = status;
+        Role = role;
 
     }
 
@@ -46,6 +48,13 @@ class User
         pending,
         accepted,
         declined,
+    }
+
+    public enum UserRole
+    {
+        patient,
+        personell,
+        admin,
     }
 
 }
