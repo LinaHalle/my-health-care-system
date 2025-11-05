@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Net;
 using App;
 
 User? active_user = null;
@@ -17,6 +18,8 @@ users[0].Permissions.Add(Permission.AddPermission);
 users[0].Permissions.Add(Permission.AcceptOrDenyUser);
 
 users[1].Permissions.Add(Permission.AcceptOrDenyAppointments);
+users[1].Permissions.Add(Permission.RegisterAppointment);
+
 
 
 users[3].Permissions.Add(Permission.RequestAppointment);
@@ -392,7 +395,47 @@ while (running)
                 break;
 
             case Permission.RegisterAppointment:
-
+                Console.WriteLine("=== Register a booking ===");
+                Console.WriteLine("Here's all your patients");
+                List<User> patients = users.Where(u => u.Role == User.UserRole.patient).ToList();
+                if (patients.Count == 0)
+                {
+                    Console.WriteLine("There's no patients listed here");
+                }
+                else
+                {
+                    for (int i = 0; i < patients.Count; i++)
+                    {
+                        Console.WriteLine($"[{i + 1}] - {patients[i].Name} - [{patients[i].SSN}]");
+                    }
+                    Console.WriteLine("Select which patient you want to schedule an appointment");
+                    string? choice = Console.ReadLine();
+                    Debug.Assert(choice != null);
+                    if (int.TryParse(choice, out int result) && result > 0 && result < patients.Count)
+                    {
+                        User selectedP = patients[result - 1];
+                        Console.Write("Enter the date you want to book (YYYY-MM-DD): ");
+                        string? dateInput = Console.ReadLine();
+                        Debug.Assert(dateInput != null);
+                        if (DateTime.TryParse(dateInput, out DateTime date))
+                        {
+                            Appointment appointment = new Appointment(selectedP, active_user, date);
+                            appointments.Add(appointment);
+                            appointment.Status = Appointment.AppointmentStatus.Accepted;
+                            Console.WriteLine($"Appointment registerd with patient: {selectedP.Name} on {date.ToShortDateString()}");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid date input");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid selection of patient");
+                    }
+                }
+                Console.WriteLine("Press ENTER to go back");
+                Console.ReadLine();
                 break;
 
             case Permission.ModifyAppointments:
