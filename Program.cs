@@ -395,6 +395,7 @@ while (running)
                 break;
 
             case Permission.RegisterAppointment:
+                tryClear();
                 Console.WriteLine("=== Register a booking ===");
                 Console.WriteLine("Here's all your patients");
                 List<User> patients = users.Where(u => u.Role == User.UserRole.patient).ToList();
@@ -439,6 +440,8 @@ while (running)
                 break;
 
             case Permission.ModifyAppointments:
+                Console.WriteLine("=== Modify appointment ===");
+
                 break;
 
             case Permission.ViewMySchedule:
