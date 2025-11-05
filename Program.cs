@@ -19,6 +19,8 @@ users[0].Permissions.Add(Permission.AcceptOrDenyUser);
 
 users[1].Permissions.Add(Permission.AcceptOrDenyAppointments);
 users[1].Permissions.Add(Permission.RegisterAppointment);
+users[1].Permissions.Add(Permission.ModifyAppointments);
+
 
 
 
@@ -412,7 +414,7 @@ while (running)
                     Console.WriteLine("Select which patient you want to schedule an appointment");
                     string? choice = Console.ReadLine();
                     Debug.Assert(choice != null);
-                    if (int.TryParse(choice, out int result) && result > 0 && result < patients.Count)
+                    if (int.TryParse(choice, out int result) && result > 0 && result <= patients.Count)
                     {
                         User selectedP = patients[result - 1];
                         Console.Write("Enter the date you want to book (YYYY-MM-DD): ");
@@ -441,7 +443,59 @@ while (running)
 
             case Permission.ModifyAppointments:
                 Console.WriteLine("=== Modify appointment ===");
+                Console.WriteLine("Here's all your accepted patient appointments");
+                List<Appointment> appointments1 = appointments.Where(a => a.Personell == active_user && a.Status == Appointment.AppointmentStatus.Accepted).ToList();
+                if (appointments1.Count == 0)
+                {
+                    Console.WriteLine("You have no appointments yet");
+                }
+                else
+                {
+                    for (int i = 0; i < appointments1.Count; i++)
+                    {
+                        Console.WriteLine($"[{i + 1}] - {appointments1[i].Patient.Name} on {appointments1[i].Date.ToShortDateString()}");
+                    }
+                    Console.Write("Select appointment to modify (number): ");
+                    string? appointmentChoice = Console.ReadLine();
+                    Debug.Assert(appointmentChoice != null);
+                    if (int.TryParse(appointmentChoice, out int result) && result > 0 && result <= appointments1.Count)
+                    {
+                        Appointment appointment = appointments1[result - 1];
+                        Console.WriteLine("1. Change date");
+                        Console.WriteLine("2. Cancel appointment");
+                        //Console.WriteLine("3. Change time");
+                        string? choice = Console.ReadLine();
+                        Debug.Assert(choice != null);
+                        if (choice == "1")
+                        {
+                            Console.Write("Select a new date (YYYY-MM-DD): ");
+                            string? dateInput = Console.ReadLine();
+                            Debug.Assert(dateInput != null);
+                            if (DateTime.TryParse(dateInput, out DateTime date))
+                            {
+                                appointment.Date = date;
+                                Console.WriteLine($"Date updated to: {dateInput}");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Invalid date input");
+                            }
+                        }
+                        else if (choice == "2")
+                        {
+                            appointment.Status = Appointment.AppointmentStatus.Denied;
+                            Console.WriteLine("Appointment status changed to denied");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid input");
+                        }
 
+
+                    }
+                }
+                Console.WriteLine("Press ENTER to go back");
+                Console.ReadLine();
                 break;
 
             case Permission.ViewMySchedule:
