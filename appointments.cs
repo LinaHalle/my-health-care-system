@@ -23,7 +23,7 @@ class Appointment
 
     public override string ToString()
     {
-        return $"{Date.ToShortDateString()} with {Personell.Name} (Status: {Status})";
+        return $"{Date:yyyy-MM-dd HH:mm()} with {Personell.Name} (Status: {Status})";
     }
 
 }

@@ -329,16 +329,44 @@ while (running)
                 if (int.TryParse(staffChoice, out int staffIndex) && staffIndex > 0 && staffIndex <= availableStaff.Count)
                 {
                     User selectedStaff = availableStaff[staffIndex - 1];
-                    Console.Write("Enter date for appointment (YYYY-MM-DD): ");
+                    Console.Write("Enter date for appointment (YYYY-MM-DD HH:mm): ");
                     String? dateInput = Console.ReadLine();
 
-                    if (DateTime.TryParse(dateInput, out DateTime date))
+                    if (DateTime.TryParseExact(dateInput, "yyyy-MM-dd HH:mm", null, System.Globalization.DateTimeStyles.None, out DateTime date))
                     {
-                        Appointment newAppointment = new Appointment(active_user, selectedStaff, date);
-                        appointments.Add(newAppointment);
+                        TimeSpan appointmentLength = TimeSpan.FromHours(1);
+                        bool timeTaken = false;
+                        foreach (Appointment appt in appointments)
+                        {
+                            if (appt.Personell == selectedStaff && appt.Status != Appointment.AppointmentStatus.Denied)
+                            {
+                                DateTime existingStart = appt.Date;
+                                DateTime existingEnd = appt.Date.Add(appointmentLength);
+                                DateTime newStart = date;
+                                DateTime newEnd = date.Add(appointmentLength);
 
-                        Console.WriteLine($"Appointment requested with {selectedStaff.Name} on {date.ToShortDateString()}.");
-                        Console.WriteLine("Status: Waiting for approval");
+                                bool overlap = newStart < existingEnd && newEnd > existingStart;
+                                if (overlap)
+                                {
+                                    timeTaken = true;
+                                    break;
+                                }
+
+                            }
+                        }
+                        if (timeTaken)
+                        {
+                            Console.WriteLine($"{selectedStaff.Name} is already booked within that hour. Try another time.");
+                        }
+                        else
+                        {
+                            Appointment newAppointment = new Appointment(active_user, selectedStaff, date);
+                            appointments.Add(newAppointment);
+
+                            Console.WriteLine($"Appointment requested with {selectedStaff.Name} on {date:yyyy-MM-dd HH:mm}. (1 hour)");
+                            Console.WriteLine("Status: Waiting for approval");
+                        }
+
                     }
                     else
                     {
@@ -417,15 +445,15 @@ while (running)
                     if (int.TryParse(choice, out int result) && result > 0 && result <= patients.Count)
                     {
                         User selectedP = patients[result - 1];
-                        Console.Write("Enter the date you want to book (YYYY-MM-DD): ");
+                        Console.Write("Enter the date you want to book (YYYY-MM-DD HH:mm): ");
                         string? dateInput = Console.ReadLine();
                         Debug.Assert(dateInput != null);
-                        if (DateTime.TryParse(dateInput, out DateTime date))
+                        if (DateTime.TryParseExact(dateInput, "yyyy-MM-dd HH:mm", null, System.Globalization.DateTimeStyles.None, out DateTime date))
                         {
                             Appointment appointment = new Appointment(selectedP, active_user, date);
                             appointments.Add(appointment);
                             appointment.Status = Appointment.AppointmentStatus.Accepted;
-                            Console.WriteLine($"Appointment registerd with patient: {selectedP.Name} on {date.ToShortDateString()}");
+                            Console.WriteLine($"Appointment registerd with patient: {selectedP.Name} on {date:yyyy-MM-dd HH:mm}. (1 hour)");
                         }
                         else
                         {
@@ -453,7 +481,7 @@ while (running)
                 {
                     for (int i = 0; i < appointments1.Count; i++)
                     {
-                        Console.WriteLine($"[{i + 1}] - {appointments1[i].Patient.Name} on {appointments1[i].Date.ToShortDateString()}");
+                        Console.WriteLine($"[{i + 1}] - {appointments1[i].Patient.Name} on {appointments1[i].Date:yyyy-MM-dd HH:mm}");
                     }
                     Console.Write("Select appointment to modify (number): ");
                     string? appointmentChoice = Console.ReadLine();
@@ -468,10 +496,10 @@ while (running)
                         Debug.Assert(choice != null);
                         if (choice == "1")
                         {
-                            Console.Write("Select a new date (YYYY-MM-DD): ");
+                            Console.Write("Select a new date and time (YYYY-MM-DD HH:mm): ");
                             string? dateInput = Console.ReadLine();
                             Debug.Assert(dateInput != null);
-                            if (DateTime.TryParse(dateInput, out DateTime date))
+                            if (DateTime.TryParseExact(dateInput, "yyyy-MM-dd HH:mm", null, System.Globalization.DateTimeStyles.None, out DateTime date))
                             {
                                 appointment.Date = date;
                                 Console.WriteLine($"Date updated to: {dateInput}");
@@ -490,8 +518,6 @@ while (running)
                         {
                             Console.WriteLine("Invalid input");
                         }
-
-
                     }
                 }
                 Console.WriteLine("Press ENTER to go back");
