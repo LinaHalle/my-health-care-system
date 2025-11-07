@@ -287,6 +287,10 @@ while (running)
                 break;
 
             case Permission.ViewJournal:
+                tryClear();
+                Console.WriteLine("=== View journal entries ===");
+
+
                 break;
 
             case Permission.WriteJournal:
