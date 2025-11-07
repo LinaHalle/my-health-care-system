@@ -330,6 +330,23 @@ while (running)
                 break;
 
             case Permission.ViewMyJournal:
+                tryClear();
+                Console.WriteLine("=== My journal entries");
+                List<JournalEntry> myEntries = journals.Where(j => j.Patient == active_user).ToList();
+                if (myEntries.Count == 0)
+                {
+                    Console.WriteLine("You have no journal entries yet");
+                }
+                else
+                {
+                    for (int i = 0; i < myEntries.Count; i++)
+                    {
+                        JournalEntry entry = myEntries[i];
+                        Console.WriteLine($"[{i + 1}]. {entry}");
+                    }
+                }
+                Console.WriteLine("Press ENTER to go back");
+                Console.ReadLine();
                 break;
 
             case Permission.ViewAppointments:
