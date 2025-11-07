@@ -20,6 +20,8 @@ users[0].Permissions.Add(Permission.AcceptOrDenyUser);
 users[1].Permissions.Add(Permission.AcceptOrDenyAppointments);
 users[1].Permissions.Add(Permission.RegisterAppointment);
 users[1].Permissions.Add(Permission.ModifyAppointments);
+users[1].Permissions.Add(Permission.WriteJournal);
+
 
 
 
@@ -29,6 +31,7 @@ users[3].Permissions.Add(Permission.ViewMyJournal);
 users[3].Permissions.Add(Permission.ViewAppointments);
 
 List<Appointment> appointments = new();
+List<JournalEntry> journals = new();
 
 
 
@@ -287,6 +290,43 @@ while (running)
                 break;
 
             case Permission.WriteJournal:
+                tryClear();
+                Console.WriteLine("=== Write Journal entries ===");
+                List<Appointment> myPatientsAppointments = appointments.Where(a => a.Personell == active_user && a.Status == Appointment.AppointmentStatus.Accepted).ToList();
+
+                if (myPatientsAppointments.Count == 0)
+                {
+                    Console.WriteLine("You currently have no patients with accepted appointments");
+                    Console.WriteLine("Press ENTER to go back");
+                    Console.ReadLine();
+                    break;
+                }
+                List<User> myPatients = myPatientsAppointments.Select(a => a.Patient).Distinct().ToList();
+
+                for (int i = 0; i < myPatients.Count; i++)
+                {
+                    Console.WriteLine($"[{i + 1}] - {myPatients[i].Name}");
+                }
+                Console.Write("Select patient (number): ");
+                string? choiceP = Console.ReadLine();
+                Debug.Assert(choiceP != null);
+                if (int.TryParse(choiceP, out int choiceIndex) && choiceIndex > 0 && choiceIndex <= myPatients.Count)
+                {
+                    User selectedPatient = myPatients[choiceIndex - 1];
+                    Console.WriteLine($"Writing in {selectedPatient.Name}'s Journal.");
+                    Console.WriteLine("Enter your note:");
+                    string? note = Console.ReadLine();
+                    Debug.Assert(note != null);
+                    journals.Add(new JournalEntry(selectedPatient, active_user, note));
+                    Console.WriteLine("Note added succesfully!");
+
+                }
+                else
+                {
+                    Console.WriteLine("Invalid choice");
+                }
+                Console.WriteLine("Press ENTER to go back");
+                Console.ReadLine();
                 break;
 
             case Permission.ViewMyJournal:
