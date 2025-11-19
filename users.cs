@@ -46,8 +46,8 @@ class User
     public enum UserStatus
     {
         pending,
-        accepted,
         declined,
+        accepted,
     }
 
     public enum UserRole

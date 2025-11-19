@@ -291,6 +291,7 @@ while (running)
                 Console.WriteLine("=== View journal entries ===");
 
 
+
                 break;
 
             case Permission.WriteJournal:
