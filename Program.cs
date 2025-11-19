@@ -21,6 +21,8 @@ users[1].Permissions.Add(Permission.AcceptOrDenyAppointments);
 users[1].Permissions.Add(Permission.RegisterAppointment);
 users[1].Permissions.Add(Permission.ModifyAppointments);
 users[1].Permissions.Add(Permission.WriteJournal);
+users[1].Permissions.Add(Permission.ViewJournal);
+
 
 
 
@@ -289,9 +291,59 @@ while (running)
             case Permission.ViewJournal:
                 tryClear();
                 Console.WriteLine("=== View journal entries ===");
+                List<JournalEntry> writtenJournals = journals.Where(j => j.Author == active_user).ToList();
 
+                if (writtenJournals.Count == 0)
+                {
+                    Console.WriteLine("You've not written any journalentries yet, contact department admin if you need approval for a patients journal");
+                    Console.WriteLine("Press ENTER to go back");
+                    Console.ReadLine();
+                    break;
+                }
 
+                List<User> journalPatients = writtenJournals.Select(j => j.Patient).Distinct().ToList();
 
+                for (int i = 0; i < journalPatients.Count; i++)
+                {
+                    Console.WriteLine($"[{i + 1}] - {journalPatients[i].Name} (SSN: {journalPatients[i].SSN})");
+                }
+                Console.Write("Select patient (number): ");
+                string? choosenP = Console.ReadLine();
+                Debug.Assert(choosenP != null);
+                if (int.TryParse(choosenP, out int choosenIndex) && choosenIndex > 0 && choosenIndex <= journalPatients.Count)
+                {
+                    User selectedPatient = journalPatients[choosenIndex - 1];
+
+                    List<JournalEntry> patientJournals = writtenJournals.Where(j => j.Patient == selectedPatient).ToList();
+
+                    if (patientJournals.Count == 0)
+                    {
+                        Console.WriteLine("No journal entries found for the selected patient");
+                        GoBack();
+                        break;
+
+                    }
+                    else
+                    {
+                        Console.WriteLine($"\n=== Journal entries for {selectedPatient.Name} ===");
+                        for (int i = 0; i < patientJournals.Count; i++)
+                        {
+                            JournalEntry entry = patientJournals[i];
+                            Console.WriteLine($"\nDate: {entry.Date}");
+                            Console.WriteLine($"\nAuthor: {entry.Author.Name}");
+                            Console.WriteLine($"\nNote: {entry.Note}");
+                            Console.WriteLine("----------------------------");
+
+                        }
+                    }
+                    GoBack();
+
+                }
+                else
+                {
+                    Console.WriteLine("Invalid selection");
+                    GoBack();
+                }
                 break;
 
             case Permission.WriteJournal:
@@ -302,8 +354,7 @@ while (running)
                 if (myPatientsAppointments.Count == 0)
                 {
                     Console.WriteLine("You currently have no patients with accepted appointments");
-                    Console.WriteLine("Press ENTER to go back");
-                    Console.ReadLine();
+                    GoBack();
                     break;
                 }
                 List<User> myPatients = myPatientsAppointments.Select(a => a.Patient).Distinct().ToList();
@@ -330,8 +381,7 @@ while (running)
                 {
                     Console.WriteLine("Invalid choice");
                 }
-                Console.WriteLine("Press ENTER to go back");
-                Console.ReadLine();
+                GoBack();
                 break;
 
             case Permission.ViewMyJournal:
@@ -350,8 +400,7 @@ while (running)
                         Console.WriteLine($"[{i + 1}]. {entry}");
                     }
                 }
-                Console.WriteLine("Press ENTER to go back");
-                Console.ReadLine();
+                GoBack();
                 break;
 
             case Permission.ViewAppointments:
@@ -370,8 +419,7 @@ while (running)
                         Console.WriteLine(a);
                     }
                 }
-                Console.WriteLine("Press ENTER to go back");
-                Console.ReadLine();
+                GoBack();
                 break;
 
             case Permission.RequestAppointment:
@@ -440,8 +488,7 @@ while (running)
                     Console.WriteLine("Invalid selection");
                 }
 
-                Console.WriteLine("Press ENTER to go back");
-                Console.ReadLine();
+                GoBack();
                 break;
 
             case Permission.AcceptOrDenyAppointments:
@@ -482,8 +529,7 @@ while (running)
                     }
                 }
 
-                Console.WriteLine("Press ENTER to go back");
-                Console.ReadLine();
+                GoBack();
                 break;
 
             case Permission.RegisterAppointment:
@@ -527,8 +573,7 @@ while (running)
                         Console.WriteLine("Invalid selection of patient");
                     }
                 }
-                Console.WriteLine("Press ENTER to go back");
-                Console.ReadLine();
+                GoBack();
                 break;
 
             case Permission.ModifyAppointments:
@@ -582,8 +627,7 @@ while (running)
                         }
                     }
                 }
-                Console.WriteLine("Press ENTER to go back");
-                Console.ReadLine();
+                GoBack();
                 break;
 
             case Permission.ViewMySchedule:
@@ -666,4 +710,10 @@ while (running)
 static void tryClear()
 {
     try { Console.Clear(); } catch { }
+}
+
+static void GoBack()
+{
+    Console.WriteLine("Press ENTER to go back to main menu");
+    Console.ReadLine();
 }
