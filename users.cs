@@ -11,6 +11,9 @@ class User
 
     public List<Permission> Permissions = new();
 
+    public Hospital? Hospital;
+    public Region? Region;
+    public List<Department> Departments = new();
     public User(string ssn, string password, string name, UserRole role, UserStatus status)
     {
         SSN = ssn;

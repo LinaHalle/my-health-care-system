@@ -15,7 +15,7 @@ class Hospital
     public string Name;
     public Region Region;
     public List<Department> Departments = new();
-
+    public List<User> Patients = new();
     public Hospital(string name, Region region)
     {
         Name = name;
@@ -30,8 +30,9 @@ class Department
     public List<User> Personell = new();
     public List<User> Patients = new();
 
-    public Department(string name)
+    public Department(string name, Hospital hospital)
     {
         Name = name;
+        Hospital = hospital;
     }
 }

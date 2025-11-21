@@ -3,9 +3,10 @@ namespace App;
 public enum Permission
 {
     AddUser,
+    AddAdmin,
     AddPermission,
     AddLocation,
-    AssignAdminRegion,
+    AddDepartment,
     ViewPermissions,
     ViewJournal,
     WriteJournal,

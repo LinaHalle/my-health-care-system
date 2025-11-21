@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using App;
 
 User? active_user = null;
@@ -16,6 +17,12 @@ users.Add(new("444", "444", "Zomi", User.UserRole.patient, User.UserStatus.accep
 users[0].Permissions.Add(Permission.AddUser);
 users[0].Permissions.Add(Permission.AddPermission);
 users[0].Permissions.Add(Permission.AcceptOrDenyUser);
+users[0].Permissions.Add(Permission.AddLocation);
+users[0].Permissions.Add(Permission.AddAdmin);
+users[0].Permissions.Add(Permission.AddDepartment);
+
+
+
 
 users[1].Permissions.Add(Permission.AcceptOrDenyAppointments);
 users[1].Permissions.Add(Permission.RegisterAppointment);
@@ -34,6 +41,7 @@ users[3].Permissions.Add(Permission.ViewAppointments);
 
 List<Appointment> appointments = new();
 List<JournalEntry> journals = new();
+List<Hospital> hospitals = new();
 
 
 
@@ -124,6 +132,9 @@ while (running)
                 case Permission.AddUser:
                     menuText += "Add new user";
                     break;
+                case Permission.AddAdmin:
+                    menuText += "Add new Admin";
+                    break;
                 case Permission.AddPermission:
                     menuText += "Add permissions to user";
                     break;
@@ -139,11 +150,11 @@ while (running)
                 case Permission.ViewAppointments:
                     menuText += "View appointments";
                     break;
-                case Permission.AssignAdminRegion:
-                    menuText += "Assign an Admin to a region";
-                    break;
                 case Permission.AddLocation:
                     menuText += "Add a new hospital";
+                    break;
+                case Permission.AddDepartment:
+                    menuText += "Add a new department";
                     break;
                 case Permission.AcceptOrDenyUser:
                     menuText += "Accept or deny a user";
@@ -184,47 +195,155 @@ while (running)
         switch (menuOptions[input])
         {
             case Permission.AddUser:
-                //creating an user that is accepted (staff, admin, patient)
-                tryClear();
-                Console.Write("New User's SSN: ");
-                string? newSsn = Console.ReadLine();
-                Debug.Assert(newSsn != null);
-
-                Console.Write("New user's name: ");
-                string? newName = Console.ReadLine();
-                Debug.Assert(newName != null);
-
-                Console.Write("Create password: ");
-                string? newPassword = Console.ReadLine();
-                Debug.Assert(newPassword != null);
-
-                Console.Write("New User's role? patient, personell or admin: ");
-                string? newRole = Console.ReadLine();
-                Debug.Assert(newRole != null);
-
-                if (newRole == "patient")
                 {
-                    users.Add(new User(newSsn, newPassword, newName, User.UserRole.patient, User.UserStatus.accepted));
-                }
-                else if (newRole == "personell")
-                {
-                    users.Add(new User(newSsn, newPassword, newName, User.UserRole.personell, User.UserStatus.accepted));
-                }
-                else if (newRole == "admin")
-                {
-                    users.Add(new User(newSsn, newPassword, newName, User.UserRole.admin, User.UserStatus.accepted));
-                }
-                else
-                {
-                    Console.WriteLine("Wrong input, press ENTER to go back");
+                    //creating an user that is accepted (staff, admin, patient)
+                    tryClear();
+                    Console.WriteLine("=== Add New User ===");
+
+                    Console.Write("New User's SSN: ");
+                    string? newSsn = Console.ReadLine();
+                    Debug.Assert(newSsn != null);
+
+                    Console.Write("New User's Name: ");
+                    string? newName = Console.ReadLine();
+                    Debug.Assert(newName != null);
+
+                    Console.Write("Create Password: ");
+                    string? newPassword = Console.ReadLine();
+                    Debug.Assert(newPassword != null);
+
+                    Console.Write("New User's role? patient or personell: ");
+                    string? newRoleInput = Console.ReadLine();
+                    Debug.Assert(newRoleInput != null);
+
+                    User.UserRole newRole;
+                    if (newRoleInput.ToLower() == "patient") newRole = User.UserRole.patient;
+                    else if (newRoleInput.ToLower() == "personell") newRole = User.UserRole.personell;
+
+                    else
+                    {
+                        GoBack();
+                        break;
+                    }
+
+                    User newUser = new User(newSsn.Trim(), newPassword.Trim(), newName.Trim(), newRole, User.UserStatus.accepted);
+
+                    if (newRole == User.UserRole.personell)
+                    {
+                        Hospital? selectedHospital = SelectHospital(hospitals);
+                        if (selectedHospital == null) break;
+
+                        newUser.Hospital = selectedHospital;
+
+                        if (selectedHospital.Departments.Count > 0)
+                        {
+                            Console.WriteLine("Select departments (comma separated numbers), or leave empty for none:");
+                            for (int i = 0; i < selectedHospital.Departments.Count; i++)
+                            {
+                                Console.WriteLine($"{i + 1}. {selectedHospital.Departments[i].Name}");
+                            }
+
+                            string? inputDeps = Console.ReadLine();
+                            if (!string.IsNullOrEmpty(inputDeps))
+                            {
+                                string[] parts = inputDeps.Split(',');
+                                for (int i = 0; i < parts.Length; i++)
+                                {
+                                    int depIndex;
+                                    if (int.TryParse(parts[i].Trim(), out depIndex) && depIndex >= 1 && depIndex <= selectedHospital.Departments.Count)
+                                    {
+                                        Department dep = selectedHospital.Departments[depIndex - 1];
+                                        newUser.Departments.Add(dep);
+                                        dep.Personell.Add(newUser);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (newRole == User.UserRole.patient)
+                    {
+                        Hospital? selectedHospital = SelectHospital(hospitals);
+                        if (selectedHospital == null) break;
+
+                        newUser.Hospital = selectedHospital;
+                        selectedHospital.Patients.Add(newUser);
+                    }
+
+                    users.Add(newUser);
+
+                    tryClear();
+                    Console.WriteLine($"New {newRole} '{newUser.Name}' added! Press ENTER to continue");
                     Console.ReadLine();
                     break;
-
                 }
-                tryClear();
-                Console.WriteLine($"New {newRole} added! Press ENTER to continue");
-                Console.ReadLine();
-                break;
+            case Permission.AddAdmin:
+                {
+                    tryClear();
+                    Console.WriteLine("=== Add Admin ===");
+
+                    Console.Write("New Admin's SSN: ");
+                    string? newSsn = Console.ReadLine();
+                    Debug.Assert(newSsn != null);
+
+                    Console.Write("New Admin's Name: ");
+                    string? newName = Console.ReadLine();
+                    Debug.Assert(newName != null);
+
+                    Console.Write("Create Password: ");
+                    string? newPassword = Console.ReadLine();
+                    Debug.Assert(newPassword != null);
+
+                    Console.WriteLine("Select Admin type:");
+                    Console.WriteLine("1. Region Admin");
+                    Console.WriteLine("2. Hospital Admin");
+
+                    string? adminTypeInput = Console.ReadLine();
+                    int adminTypeIndex;
+                    if (!int.TryParse(adminTypeInput, out adminTypeIndex) || (adminTypeIndex != 1 && adminTypeIndex != 2))
+                    {
+                        Console.WriteLine("Invalid input");
+                        GoBack();
+                        break;
+                    }
+
+                    User newAdmin = new User(newSsn.Trim(), newPassword.Trim(), newName.Trim(), User.UserRole.admin, User.UserStatus.accepted);
+
+                    if (adminTypeIndex == 1)
+                    {
+                        Region[] Regions = Enum.GetValues<Region>();
+
+                        Console.WriteLine("Select Region:");
+                        for (int i = 0; i < Regions.Length; i++)
+                        {
+                            Console.WriteLine($"{i + 1}. {Regions[i]}");
+                        }
+                        string? regionInput = Console.ReadLine();
+                        int regionIndex;
+                        if (!int.TryParse(regionInput, out regionIndex) || regionIndex < 1 || regionIndex > Regions.Length)
+                        {
+                            Console.WriteLine("Invalid input");
+                            GoBack();
+                            break;
+                        }
+                        newAdmin.Region = Regions[regionIndex - 1];
+                        newAdmin.Hospital = null;
+                    }
+                    else
+                    {
+                        Hospital? selectedHospital = SelectHospital(hospitals);
+                        if (selectedHospital == null) break;
+
+                        newAdmin.Hospital = selectedHospital;
+                        newAdmin.Region = null;
+                    }
+
+                    users.Add(newAdmin);
+
+                    tryClear();
+                    Console.WriteLine($"New Admin '{newAdmin.Name}' added successfully!");
+                    GoBack();
+                    break;
+                }
 
             case Permission.AddPermission:
                 foreach (User user in users)
@@ -577,6 +696,7 @@ while (running)
                 break;
 
             case Permission.ModifyAppointments:
+                tryClear();
                 Console.WriteLine("=== Modify appointment ===");
                 Console.WriteLine("Here's all your accepted patient appointments");
                 List<Appointment> appointments1 = appointments.Where(a => a.Personell == active_user && a.Status == Appointment.AppointmentStatus.Accepted).ToList();
@@ -636,11 +756,63 @@ while (running)
             case Permission.ViewHospitalSchedule:
                 break;
 
-            case Permission.AssignAdminRegion:
+            case Permission.AddLocation:
+                tryClear();
+                Console.WriteLine("Choose region: ");
+                Region[] allRegions = Enum.GetValues<Region>();
+
+                for (int i = 0; i < allRegions.Length; i++)
+                {
+                    Console.WriteLine($"[{i + 1}]. {allRegions[i]}");
+                }
+                string? choosenRegion = Console.ReadLine();
+                Debug.Assert(choosenRegion != null);
+
+                int myIndex;
+                bool success = int.TryParse(choosenRegion, out myIndex);
+
+                if (!success || myIndex < 1 || myIndex > allRegions.Length)
+                {
+                    Console.WriteLine("Invalid input");
+                    GoBack();
+                    break;
+                }
+
+                Region selectedRegion = allRegions[myIndex - 1];
+
+                Console.WriteLine("Write the name of the new hospital:");
+                string? hospitalName = Console.ReadLine();
+                Debug.Assert(hospitalName != null);
+
+                Hospital newHospital = new Hospital(hospitalName, selectedRegion);
+                hospitals.Add(newHospital);
+
+                Console.WriteLine($"Hospital '{hospitalName}' added to {selectedRegion}");
+                GoBack();
                 break;
 
-            case Permission.AddLocation:
-                break;
+            case Permission.AddDepartment:
+                {
+                    tryClear();
+                    Console.WriteLine("=== Add Department ===");
+                    Hospital selectedHospital = SelectHospital(hospitals);
+                    if (selectedHospital == null) break;
+
+                    Console.WriteLine("Write the name of the new Department");
+                    string? departmentName = Console.ReadLine();
+                    if (departmentName == null || departmentName.Trim().Length == 0)
+                    {
+                        Console.WriteLine("Invalid input");
+                        GoBack();
+                        break;
+                    }
+                    Department department = new Department(departmentName.Trim(), selectedHospital);
+                    selectedHospital.Departments.Add(department);
+                    Console.WriteLine($"Department '{department.Name}' added to hospital '{selectedHospital}'");
+                    GoBack();
+                    break;
+                }
+
 
             case Permission.AcceptOrDenyUser:
                 foreach (User user in users)
@@ -716,4 +888,34 @@ static void GoBack()
 {
     Console.WriteLine("Press ENTER to go back to main menu");
     Console.ReadLine();
+}
+
+static Hospital SelectHospital(List<Hospital> hospitals)
+{
+    if (hospitals.Count == 0)
+    {
+        Console.WriteLine("No hospitals found. Add a hospital first.");
+        Console.WriteLine("Press ENTER to go back.");
+        Console.ReadLine();
+        return null; // eller throw om du föredrar det
+    }
+
+    Console.WriteLine("Select a hospital:");
+    for (int i = 0; i < hospitals.Count; i++)
+    {
+        Console.WriteLine($"{i + 1}. {hospitals[i].Name} ({hospitals[i].Region})");
+    }
+
+    string? input = Console.ReadLine();
+    int index;
+
+    if (!int.TryParse(input, out index) || index < 1 || index > hospitals.Count)
+    {
+        Console.WriteLine("Invalid input.");
+        Console.WriteLine("Press ENTER to go back.");
+        Console.ReadLine();
+        return null;
+    }
+
+    return hospitals[index - 1];
 }
