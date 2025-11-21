@@ -81,32 +81,35 @@ while (running)
                 }
                 if (active_user == null)
                 {
-                    Console.WriteLine("No matching user, try again or register an account, press ENTER to go back");
-                    Console.ReadLine();
+                    Console.WriteLine("No matching user, try again or register an account.");
+                    GoBack();
                 }
                 break;
 
             case "2":
                 //requesting to be a patient, pending by deafult
                 tryClear();
-                Console.Write("Enter your SSN: ");
-                string? newSsn = Console.ReadLine();
+                string newSsn = ReadInput("Enter your SSN: ");
+                string newName = ReadInput("Enter your name: ");
+                string newPassword = ReadInput("Create a password: ");
 
-                Console.Write("Enter your name: ");
-                string? newName = Console.ReadLine();
+                Hospital? selectedHospital = SelectHospital(hospitals);
+                if (selectedHospital == null)
+                {
+                    Console.WriteLine("No hospital selected. Registration canceled.");
+                    GoBack();
+                    break;
+                }
 
-                Console.Write("Create a password: ");
-                string? newPassword = Console.ReadLine();
+                User newPatient = new User(newSsn, newPassword, newName, User.UserRole.patient, User.UserStatus.pending);
+                newPatient.Hospital = selectedHospital;
+                selectedHospital.Patients.Add(newPatient); // sjukhusets lista
+                users.Add(newPatient);                     // globala listan
 
-                Debug.Assert(newSsn != null);
-                Debug.Assert(newName != null);
-                Debug.Assert(newPassword != null);
-
-                users.Add(new User(newSsn, newPassword, newName, User.UserRole.patient, User.UserStatus.pending));
 
                 tryClear();
-                Console.WriteLine("Account registerd succesfully, waiting for approval, press ENTER to go back");
-                Console.ReadLine();
+                Console.WriteLine("Account registerd succesfully, waiting for approval.");
+                GoBack();
                 break;
 
             case "3":
@@ -200,17 +203,9 @@ while (running)
                     tryClear();
                     Console.WriteLine("=== Add New User ===");
 
-                    Console.Write("New User's SSN: ");
-                    string? newSsn = Console.ReadLine();
-                    Debug.Assert(newSsn != null);
-
-                    Console.Write("New User's Name: ");
-                    string? newName = Console.ReadLine();
-                    Debug.Assert(newName != null);
-
-                    Console.Write("Create Password: ");
-                    string? newPassword = Console.ReadLine();
-                    Debug.Assert(newPassword != null);
+                    string newSsn = ReadInput("New User's SSN: ");
+                    string newName = ReadInput("New User's Name: ");
+                    string newPassword = ReadInput("Create Password: ");
 
                     Console.Write("New User's role? patient or personell: ");
                     string? newRoleInput = Console.ReadLine();
@@ -751,10 +746,50 @@ while (running)
                 break;
 
             case Permission.ViewMySchedule:
+                tryClear();
+                Console.WriteLine("=== My schedule ===");
+
+                List<Appointment> myschedule = appointments.Where(a => (a.Patient == active_user || a.Personell == active_user) && a.Status == Appointment.AppointmentStatus.Accepted).OrderBy(a => a.Date).ToList();
+
+                if (myschedule.Count == 0)
+                {
+                    Console.WriteLine("No accepted appointments found.");
+                }
+                else
+                {
+                    foreach (Appointment appointment in myschedule)
+                    {
+                        Console.WriteLine(appointment.ToString());
+                    }
+                }
+                GoBack();
                 break;
 
             case Permission.ViewHospitalSchedule:
-                break;
+                {
+                    tryClear();
+                    Console.WriteLine("=== Hospital schedule ===");
+                    Hospital? selectedHospital = SelectHospital(hospitals);
+                    if (selectedHospital == null) break;
+
+                    Console.WriteLine($"Hospital: {selectedHospital.Name} ({selectedHospital.Region})");
+
+                    List<Appointment> hospitalAppointments = appointments.Where(a => (a.Patient.Hospital == selectedHospital || a.Personell.Hospital == selectedHospital) && a.Status == Appointment.AppointmentStatus.Accepted).OrderBy(a => a.Date).ToList();
+
+                    if (hospitalAppointments.Count == 0)
+                    {
+                        Console.WriteLine($"No accepted appointments scheduled for {selectedHospital.Name}.");
+                    }
+                    else
+                    {
+                        foreach (Appointment appointment in hospitalAppointments)
+                        {
+                            Console.WriteLine($"{appointment.Date:yyyy-MM-dd HH:mm} - {appointment.Patient.Name} with {appointment.Personell.Name}");
+                        }
+                    }
+                    GoBack();
+                    break;
+                }
 
             case Permission.AddLocation:
                 tryClear();
@@ -918,4 +953,12 @@ static Hospital SelectHospital(List<Hospital> hospitals)
     }
 
     return hospitals[index - 1];
+}
+
+static string ReadInput(string prompt)
+{
+    Console.Write(prompt);
+    string? input = Console.ReadLine();
+    Debug.Assert(input != null);
+    return input.Trim();
 }
